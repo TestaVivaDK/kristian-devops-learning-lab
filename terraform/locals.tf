@@ -1,8 +1,9 @@
 locals {
   common_tags = {
-    environment = "learning"
-    owner       = var.owner
-    managed_by  = "terraform"
-    project     = "devops-learning-lab"
+    environment = "lab"
+    owner = var.owner
+    managed_by = "terraform"
+    project = "kristian-devops-learning-lab"
+    training_phase = "update-practice"
   }
 }
