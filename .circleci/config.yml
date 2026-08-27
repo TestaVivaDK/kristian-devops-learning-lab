@@ -1,0 +1,41 @@
+version: 2.1
+
+jobs:
+  docker-smoke-test:
+    machine:
+      image: ubuntu-2204:current
+    steps:
+      - checkout
+      - run:
+          name: Build image
+          command: docker build -t kristian-web:1.0.0 .
+      - run:
+          name: Run container, wait for health, test, and clean up
+          command: |
+            cleanup() {
+              docker rm -f kristian-web >/dev/null 2>&1 || true
+            }
+
+            trap cleanup EXIT
+
+            docker run -d --name kristian-web -p 8080:8080 kristian-web:1.0.0
+
+            for attempt in $(seq 1 30); do
+              status="$(docker inspect --format '{{.State.Health.Status}}' kristian-web)"
+              if [ "$status" = "healthy" ]; then
+                break
+              fi
+              sleep 2
+            done
+
+            [ "$(docker inspect --format '{{.State.Health.Status}}' kristian-web)" = "healthy" ]
+            curl --fail --silent http://127.0.0.1:8080/ >/tmp/kristian-web-home.html
+            curl --fail --silent http://127.0.0.1:8080/healthz | grep -Fx "ok"
+            grep -F "Kristian" /tmp/kristian-web-home.html
+
+
+
+workflows:
+  docker-checks:
+    jobs:
+      - docker-smoke-test
