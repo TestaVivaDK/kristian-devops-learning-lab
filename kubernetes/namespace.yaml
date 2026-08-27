@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: kristian-lab
+  labels:
+    app.kubernetes.io/part-of: kristian-devops-learning-lab
+    owner: kristian

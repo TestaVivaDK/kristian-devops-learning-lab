@@ -1,0 +1,9 @@
+.git
+.github
+.DS_Store
+terraform
+kubernetes
+README.md
+terraform.tfstate
+terraform.tfstate.*
+tfplan

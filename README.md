@@ -2,6 +2,34 @@
 
 Beginner project for learning GitHub, Terraform, Azure, and Kubernetes.
 
+## Docker Compose
+
+Start the website:
+
+```bash
+docker compose up -d
+```
+
+View logs:
+
+```bash
+docker compose logs
+```
+
+Test the site:
+
+```bash
+curl http://localhost:8080
+curl http://localhost:8080/healthz
+docker compose ps
+```
+
+Stop the site:
+
+```bash
+docker compose down
+```
+
 ## Safety boundaries
 
 - Azure subscription: StagingCSP

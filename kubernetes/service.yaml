@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: learning-web
+  namespace: kristian-lab
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: learning-web
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
