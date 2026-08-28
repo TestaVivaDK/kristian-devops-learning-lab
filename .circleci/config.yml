@@ -8,7 +8,7 @@ jobs:
       - checkout
       - run:
           name: Build image
-          command: docker build -t kristian-web:1.0.0 .
+          command: docker build -t kristian-web:${CIRCLE_SHA1} .
       - run:
           name: Run container, wait for health, test, and clean up
           command: |
@@ -18,7 +18,7 @@ jobs:
 
             trap cleanup EXIT
 
-            docker run -d --name kristian-web -p 8080:8080 kristian-web:1.0.0
+            docker run -d --name kristian-web -p 8080:8080 kristian-web:${CIRCLE_SHA1}
 
             for attempt in $(seq 1 30); do
               status="$(docker inspect --format '{{.State.Health.Status}}' kristian-web)"
@@ -33,9 +33,49 @@ jobs:
             curl --fail --silent http://127.0.0.1:8080/healthz | grep -Fx "ok"
             grep -F "Kristian" /tmp/kristian-web-home.html
 
-
+  publish-image:
+    machine:
+      image: ubuntu-2204:current
+    steps:
+      - checkout
+      - run:
+          name: Verify ACR and Kubernetes variables
+          command: |
+            test -n "${KUBECONFIG_B64:-}"
+            test -n "${ACR_LOGIN_SERVER:-}"
+            test -n "${ACR_USERNAME:-}"
+            test -n "${ACR_PASSWORD:-}"
+      - run:
+          name: Push image to ACR
+          command: |
+            IMAGE_REF="${ACR_LOGIN_SERVER}/kristian-web:${CIRCLE_SHA1}"
+            echo "${ACR_PASSWORD}" | docker login "${ACR_LOGIN_SERVER}" --username "${ACR_USERNAME}" --password-stdin
+            docker build -t "${IMAGE_REF}" .
+            docker push "${IMAGE_REF}"
+      - run:
+          name: Configure kubectl
+          command: |
+            mkdir -p "${HOME}/.kube"
+            echo "${KUBECONFIG_B64}" | base64 --decode > "${HOME}/.kube/config"
+            chmod 600 "${HOME}/.kube/config"
+            kubectl config current-context
+      - run:
+          name: Deploy tested image to AKS
+          command: |
+            IMAGE_REF="${ACR_LOGIN_SERVER}/kristian-web:${CIRCLE_SHA1}"
+            kubectl apply -f kubernetes/namespace.yaml
+            kubectl apply -f kubernetes/limit-range.yaml
+            kubectl apply -f kubernetes/resource-quota.yaml
+            kubectl apply -f kubernetes/service.yaml
+            kubectl apply -f kubernetes/deployment.yaml
+            kubectl set image deployment/kristian-web nginx="${IMAGE_REF}" -n kristian-lab
+            kubectl rollout status deployment/kristian-web -n kristian-lab
+            kubectl get pods,services,endpointslices -n kristian-lab
 
 workflows:
   docker-checks:
     jobs:
       - docker-smoke-test
+      - publish-image:
+          requires:
+            - docker-smoke-test
