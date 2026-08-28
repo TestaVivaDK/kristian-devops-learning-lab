@@ -59,18 +59,23 @@ jobs:
             echo "${KUBECONFIG_B64}" | base64 --decode > "${HOME}/.kube/config"
             chmod 600 "${HOME}/.kube/config"
             kubectl config current-context
+            kubectl get namespace kristian-lab
       - run:
           name: Deploy tested image to AKS
           command: |
+            NAMESPACE="kristian-lab"
             IMAGE_REF="${ACR_LOGIN_SERVER}/kristian-web:${CIRCLE_SHA1}"
-            kubectl apply -f kubernetes/namespace.yaml
-            kubectl apply -f kubernetes/limit-range.yaml
-            kubectl apply -f kubernetes/resource-quota.yaml
-            kubectl apply -f kubernetes/service.yaml
-            kubectl apply -f kubernetes/deployment.yaml
-            kubectl set image deployment/kristian-web nginx="${IMAGE_REF}" -n kristian-lab
-            kubectl rollout status deployment/kristian-web -n kristian-lab
-            kubectl get pods,services,endpointslices -n kristian-lab
+            grep -q '^  namespace: kristian-lab$' kubernetes/deployment.yaml
+            grep -q '^  namespace: kristian-lab$' kubernetes/service.yaml
+            grep -q '^  namespace: kristian-lab$' kubernetes/limit-range.yaml
+            grep -q '^  namespace: kristian-lab$' kubernetes/resource-quota.yaml
+            kubectl apply -f kubernetes/limit-range.yaml -n "${NAMESPACE}"
+            kubectl apply -f kubernetes/resource-quota.yaml -n "${NAMESPACE}"
+            kubectl apply -f kubernetes/service.yaml -n "${NAMESPACE}"
+            kubectl apply -f kubernetes/deployment.yaml -n "${NAMESPACE}"
+            kubectl set image deployment/kristian-web nginx="${IMAGE_REF}" -n "${NAMESPACE}"
+            kubectl rollout status deployment/kristian-web -n "${NAMESPACE}"
+            kubectl get pods,services,endpointslices -n "${NAMESPACE}"
 
 workflows:
   docker-checks:
