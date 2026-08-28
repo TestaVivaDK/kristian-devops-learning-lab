@@ -67,6 +67,18 @@ jobs:
             sudo mv bin/linux_amd64/kubelogin /usr/local/bin/kubelogin
             kubelogin --version
       - run:
+          name: Install Azure CLI
+          command: |
+            curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
+            az version
+      - run:
+          name: Login to Azure
+          command: |
+            az login --service-principal \
+              --username "${AZURE_CLIENT_ID}" \
+              --password "${AZURE_CLIENT_SECRET}" \
+              --tenant "${AZURE_TENANT_ID}"
+      - run:
           name: Configure kubectl
           command: |
             mkdir -p "${HOME}/.kube"
