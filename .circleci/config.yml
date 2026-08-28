@@ -60,6 +60,13 @@ jobs:
             sudo mv kubectl /usr/local/bin/kubectl
             kubectl version --client
       - run:
+          name: Install kubelogin
+          command: |
+            curl -LO https://github.com/Azure/kubelogin/releases/latest/download/kubelogin-linux-amd64.zip
+            unzip kubelogin-linux-amd64.zip
+            sudo mv bin/linux_amd64/kubelogin /usr/local/bin/kubelogin
+            kubelogin --version
+      - run:
           name: Configure kubectl
           command: |
             mkdir -p "${HOME}/.kube"
