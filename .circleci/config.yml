@@ -53,6 +53,13 @@ jobs:
             docker build -t "${IMAGE_REF}" .
             docker push "${IMAGE_REF}"
       - run:
+          name: Install kubectl
+          command: |
+            curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+            chmod +x kubectl
+            sudo mv kubectl /usr/local/bin/kubectl
+            kubectl version --client
+      - run:
           name: Configure kubectl
           command: |
             mkdir -p "${HOME}/.kube"
