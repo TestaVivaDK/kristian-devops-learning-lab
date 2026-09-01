@@ -1,6 +1,7 @@
 FROM nginxinc/nginx-unprivileged:1.31.3-alpine-slim
 
 COPY --chown=101:101 app/ /usr/share/nginx/html/
+COPY --chown=101:101 nginx/default.conf /etc/nginx/conf.d/default.conf
 
 EXPOSE 8080
 
