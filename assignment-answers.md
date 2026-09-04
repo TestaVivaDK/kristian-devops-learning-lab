@@ -85,3 +85,53 @@ If the Service selector does not match the pod labels, the Service exists but is
 ### What is the difference between `Running` and `Ready`?
 
 `Running` means the container process has started. `Ready` means Kubernetes believes the pod is healthy enough to receive traffic.
+
+## Monitoring
+
+### What is Prometheus?
+
+Prometheus is the metrics collector and time-series database. In this project, it scrapes Kubernetes and workload metrics and stores them so they can be queried over time.
+
+### What is Grafana?
+
+Grafana is the user interface on top of Prometheus. It connects to Prometheus as a data source and turns metrics into dashboards, panels, and alert rules.
+
+### What was deployed?
+
+- Grafana was deployed in namespace `grafana-kristian`.
+- Prometheus was deployed in namespace `monitoring` using `kube-prometheus-stack`.
+- The bundled Grafana in `kube-prometheus-stack` was disabled because a separate Grafana release was already used.
+
+### How does Grafana connect to Prometheus?
+
+Grafana uses a Prometheus data source pointing to:
+
+`http://monitoring-kube-prometheus-prometheus.monitoring.svc:9090`
+
+That is the internal Kubernetes Service for Prometheus inside the cluster.
+
+### What does the dashboard show?
+
+The dashboard covers:
+
+- pod CPU usage
+- pod memory usage
+- pod restart count
+- deployment ready replicas
+- deployment unavailable replicas
+- node health
+
+### What alert was created?
+
+A Grafana-managed alert was created for unavailable replicas of the `kristian-web` Deployment in namespace `kristian-lab`.
+
+The alert condition is based on:
+
+`kube_deployment_status_replicas_unavailable{namespace="kristian-lab", deployment="kristian-web"} > 0`
+
+The alert was verified by triggering a controlled failure and confirming that it fired inside Grafana.
+
+### What limitations were found?
+
+- NGINX ingress metrics were not available because the ingress controller had metrics disabled in this cluster.
+- Email notifications were not configured because SMTP was not configured in Grafana.
