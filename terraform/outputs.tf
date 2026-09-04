@@ -27,3 +27,14 @@ output "storage_container_name" {
   description = "Private blob container name."
   value       = azurerm_storage_container.application.name
 }
+
+output "acr_name" {
+  description = "Generated Azure Container Registry name."
+  value       = azurerm_container_registry.lab.name
+}
+
+output "acr_login_server" {
+  description = "Azure Container Registry login server."
+  value       = azurerm_container_registry.lab.login_server
+}
+
