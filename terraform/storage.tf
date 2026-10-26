@@ -24,9 +24,6 @@ resource "azurerm_storage_account" "lab" {
   cross_tenant_replication_enabled = false
   tags                             = local.common_tags
 
-  lifecycle {
-    prevent_destroy = true
-  }
 }
 
 resource "azurerm_storage_container" "application" {
@@ -34,7 +31,4 @@ resource "azurerm_storage_container" "application" {
   storage_account_id    = azurerm_storage_account.lab.id
   container_access_type = "private"
 
-  lifecycle {
-    prevent_destroy = true
-  }
 }

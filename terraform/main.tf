@@ -3,7 +3,4 @@ resource "azurerm_resource_group" "lab" {
   location = var.location
   tags     = local.common_tags
 
-  lifecycle {
-    prevent_destroy = true
-  }
 }

@@ -18,7 +18,4 @@ resource "azurerm_container_registry" "lab" {
   admin_enabled       = false
   tags                = local.common_tags
 
-  lifecycle {
-    prevent_destroy = true
-  }
 }

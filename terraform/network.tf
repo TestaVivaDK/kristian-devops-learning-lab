@@ -5,9 +5,6 @@ resource "azurerm_virtual_network" "lab" {
   resource_group_name = azurerm_resource_group.lab.name
   tags                = local.common_tags
 
-  lifecycle {
-    prevent_destroy = true
-  }
 }
 
 resource "azurerm_subnet" "application" {
@@ -16,7 +13,4 @@ resource "azurerm_subnet" "application" {
   virtual_network_name = azurerm_virtual_network.lab.name
   address_prefixes     = ["10.50.1.0/24"]
 
-  lifecycle {
-    prevent_destroy = true
-  }
 }
